@@ -6,9 +6,7 @@ import co.leomedina.model.ArtWork;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Calendar;
+import java.util.*;
 
 class Generator {
     private Collection mCollection;
@@ -25,6 +23,7 @@ class Generator {
     private void generateMenu() {
         mMenu = new HashMap<>();
         mMenu.put("Add", "Add new artwork to collection");
+        mMenu.put("Choose", "Choose a work to display");
         mMenu.put("Quit", "Exit Program");
     }
 
@@ -47,6 +46,12 @@ class Generator {
             switch (choice) {
                 case "add":
                     mCollection.addArtWork(promptNewArtWork());
+                    break;
+                case "choose":
+                    String artist = promptArtist();
+                    ArtWork artistWork = promptForArtworkForArtist(artist);
+                    //TODO: TOO SONG QUEUE
+                    System.out.printf("YOu chose: %s %n", artistWork);
                     break;
                 case "quit":
                     System.out.println("Thanks for playing!");
@@ -88,5 +93,38 @@ class Generator {
     private boolean isValidYear(int year) {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         return year <= currentYear && year > 1400;
+    }
+
+    private int promptForIndex(List<String> options) throws IOException {
+        int counter = 1;
+
+        for (String option : options) {
+            System.out.printf("%d.) %s%n", counter, option);
+            counter++;
+        }
+        System.out.print("Your Choice ...");
+        String optionAsString = mReader.readLine();
+        int choice = Integer.parseInt(optionAsString.trim());
+
+        return choice - 1;
+    }
+
+    private String promptArtist() throws IOException {
+        System.out.println("Available Artist: ");
+        List<String> artists = new ArrayList<>(mCollection.getArtists());
+        int index = promptForIndex(artists);
+        return artists.get(index);
+    }
+
+    private ArtWork promptForArtworkForArtist(String artist) throws IOException {
+        List<ArtWork> artWorks = mCollection.getSongForArtist(artist);
+        List<String> artworkTitles = new ArrayList<>();
+
+        for (ArtWork artWork : artWorks) {
+            artworkTitles.add(artWork.getTitle());
+        }
+        System.out.printf("Available Songs for %s: %n", artist);
+        int index = promptForIndex(artworkTitles);
+        return artWorks.get(index);
     }
 }
